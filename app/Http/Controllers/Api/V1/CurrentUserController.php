@@ -1,0 +1,39 @@
+<?php
+
+namespace App\Http\Controllers\Api\V1;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use OpenApi\Attributes as OA;
+
+class CurrentUserController extends Controller
+{
+    #[OA\Get(
+        path: '/api/v1/user',
+        summary: 'Profil des authentifizierten Benutzers',
+        security: [['sanctum' => []]],
+        tags: ['Auth'],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Benutzerdaten',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'id', type: 'integer'),
+                        new OA\Property(property: 'name', type: 'string'),
+                        new OA\Property(property: 'email', type: 'string', format: 'email'),
+                        new OA\Property(property: 'email_verified_at', type: 'string', format: 'date-time', nullable: true),
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: 'Nicht authentifiziert'),
+        ]
+    )]
+    public function show(Request $request): JsonResponse
+    {
+        return response()->json(
+            $request->user()->only(['id', 'name', 'email', 'email_verified_at'])
+        );
+    }
+}

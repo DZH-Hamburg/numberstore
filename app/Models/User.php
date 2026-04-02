@@ -10,9 +10,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['name', 'email', 'password', 'is_platform_admin', 'can_create_groups'])]
+#[Fillable(['name', 'email', 'password', 'avatar_path', 'is_platform_admin', 'can_create_groups'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -59,6 +60,22 @@ class User extends Authenticatable
     public function isMemberOf(Group $group): bool
     {
         return $this->groups()->where('groups.id', $group->id)->exists();
+    }
+
+    public function gravatarUrl(int $size = 160): string
+    {
+        $hash = md5(strtolower(trim($this->email)));
+
+        return 'https://www.gravatar.com/avatar/'.$hash.'?s='.$size.'&d=mp';
+    }
+
+    public function avatarUrl(int $size = 160): string
+    {
+        if ($this->avatar_path && Storage::disk('public')->exists($this->avatar_path)) {
+            return Storage::disk('public')->url($this->avatar_path);
+        }
+
+        return $this->gravatarUrl($size);
     }
 
     protected function casts(): array

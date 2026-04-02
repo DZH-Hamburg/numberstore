@@ -1,3 +1,18 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    html {
+        @apply font-sans antialiased text-opta-grey;
+        font-size: 9pt;
+    }
+
+    h1, h2, h3, h4 {
+        @apply text-opta-teal-dark font-semibold tracking-tight;
+    }
+
+    a:not([class]) {
+        @apply text-opta-teal-dark underline decoration-opta-teal-light underline-offset-2 hover:text-opta-teal-light;
+    }
+}

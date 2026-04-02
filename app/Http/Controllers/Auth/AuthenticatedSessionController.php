@@ -16,7 +16,25 @@ class AuthenticatedSessionController extends Controller
      */
     public function create(): View
     {
-        return view('auth.login');
+        $devAdminEmail = null;
+        $devAdminPassword = null;
+
+        if (app()->environment('local')) {
+            $devAdminEmail = $this->devAdminEnvString('dev_admin_user');
+            $devAdminPassword = $this->devAdminEnvString('dev_admin_password');
+        }
+
+        return view('auth.login', [
+            'devAdminEmail' => $devAdminEmail,
+            'devAdminPassword' => $devAdminPassword,
+        ]);
+    }
+
+    private function devAdminEnvString(string $key): ?string
+    {
+        $value = env($key);
+
+        return is_string($value) && $value !== '' ? $value : null;
     }
 
     /**

@@ -17,8 +17,8 @@
     </head>
     <body class="font-sans text-opta-grey antialiased">
         <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gradient-to-br from-white via-opta-teal-light/10 to-opta-sky/20">
-            <div>
-                <a href="/" class="block">
+            <div class="inline-flex rounded-xl border border-opta-teal-light/45 bg-white/90 p-2 shadow-sm shadow-opta-teal-dark/[0.06] ring-1 ring-opta-teal-dark/[0.04]">
+                <a href="/" class="block rounded-lg overflow-hidden">
                     <img src="{{ asset('od-logo.jpg') }}" alt="{{ config('app.name') }}" class="h-14 w-auto" width="120" height="56" />
                 </a>
             </div>

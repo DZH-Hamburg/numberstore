@@ -1,0 +1,6 @@
+{
+    "preset": "laravel",
+    "notName": [
+        "2026_04_02_213908_add_avatar_path_to_users_table.php"
+    ]
+}

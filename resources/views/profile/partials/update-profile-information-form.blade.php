@@ -13,9 +13,49 @@
         @csrf
     </form>
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6">
+    @if ($user->avatar_path)
+        <form id="remove-avatar-form" method="post" action="{{ route('profile.avatar.destroy') }}" class="hidden">
+            @csrf
+            @method('delete')
+        </form>
+    @endif
+
+    <form method="post" action="{{ route('profile.update') }}" enctype="multipart/form-data" class="mt-6 space-y-6">
         @csrf
         @method('patch')
+
+        <div>
+            <x-input-label :value="__('Profile picture')" />
+            <div class="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center">
+                <img
+                    src="{{ $user->avatarUrl() }}"
+                    alt=""
+                    width="80"
+                    height="80"
+                    class="h-20 w-20 shrink-0 rounded-full object-cover border border-gray-200 bg-gray-50"
+                />
+                <div class="flex flex-col gap-2">
+                    <input
+                        id="avatar"
+                        name="avatar"
+                        type="file"
+                        accept="image/*"
+                        class="block w-full text-sm text-gray-600 file:mr-4 file:rounded-md file:border-0 file:bg-indigo-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-indigo-700 hover:file:bg-indigo-100"
+                    />
+                    <x-input-error class="mt-0" :messages="$errors->get('avatar')" />
+                    @if ($user->avatar_path)
+                        <button
+                            type="submit"
+                            form="remove-avatar-form"
+                            class="text-left text-sm text-gray-600 underline hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        >
+                            {{ __('Remove uploaded picture (use Gravatar)') }}
+                        </button>
+                    @endif
+                </div>
+            </div>
+            <p class="mt-1 text-xs text-gray-500">{{ __('If you do not upload a picture, your Gravatar for this email is used when available.') }}</p>
+        </div>
 
         <div>
             <x-input-label for="name" :value="__('Name')" />

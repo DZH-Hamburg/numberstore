@@ -35,6 +35,13 @@
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button type="button" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-opta-grey bg-white hover:text-opta-teal-dark focus:outline-none transition ease-in-out duration-150">
+                            <img
+                                src="{{ Auth::user()->avatarUrl(40) }}"
+                                alt=""
+                                width="32"
+                                height="32"
+                                class="me-2 h-8 w-8 rounded-full object-cover border border-opta-teal-light/40"
+                            />
                             <div>{{ Auth::user()->name }}</div>
                             <div class="ms-1">
                                 <svg class="fill-current h-4 w-4 text-opta-teal-dark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
@@ -90,9 +97,18 @@
         </div>
 
         <div class="pt-4 pb-1 border-t border-opta-teal-light/30">
-            <div class="px-4">
-                <div class="font-medium text-base text-opta-grey">{{ Auth::user()->name }}</div>
-                <div class="font-medium text-sm text-opta-grey/80">{{ Auth::user()->email }}</div>
+            <div class="px-4 flex items-center gap-3">
+                <img
+                    src="{{ Auth::user()->avatarUrl(48) }}"
+                    alt=""
+                    width="48"
+                    height="48"
+                    class="h-12 w-12 shrink-0 rounded-full object-cover border border-opta-teal-light/40"
+                />
+                <div>
+                    <div class="font-medium text-base text-opta-grey">{{ Auth::user()->name }}</div>
+                    <div class="font-medium text-sm text-opta-grey/80">{{ Auth::user()->email }}</div>
+                </div>
             </div>
 
             <div class="mt-3 space-y-1 px-2">

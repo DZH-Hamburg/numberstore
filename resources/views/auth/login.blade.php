@@ -1,4 +1,15 @@
 <x-guest-layout>
+    <x-slot name="footer">
+        <p class="text-center text-sm text-opta-grey/80">
+            <a
+                href="https://curenect.de/impressum/"
+                class="text-opta-teal-dark hover:text-opta-teal-light underline underline-offset-2 focus:outline-none focus:ring-2 focus:ring-opta-teal-dark focus:ring-offset-2 rounded"
+                target="_blank"
+                rel="noopener noreferrer"
+            >{{ __('Impressum') }}</a>
+        </p>
+    </x-slot>
+
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 

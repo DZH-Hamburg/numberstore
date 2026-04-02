@@ -26,6 +26,12 @@
             <div class="w-full sm:max-w-md mt-6 px-6 py-5 bg-white/95 shadow-lg shadow-opta-teal-dark/5 border border-opta-teal-light/30 overflow-hidden sm:rounded-xl">
                 {{ $slot }}
             </div>
+
+            @isset($footer)
+                <div class="w-full sm:max-w-md mt-4 px-1">
+                    {{ $footer }}
+                </div>
+            @endisset
         </div>
     </body>
 </html>

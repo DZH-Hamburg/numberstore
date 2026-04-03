@@ -143,6 +143,61 @@ In **Produktion** solltest du `L5_SWAGGER_GENERATE_ALWAYS` in der `.env` auf `fa
 php artisan test
 ```
 
+## Deployment (Produktion / Entwicklungsserver)
+
+Auf dem Entwicklungsserver liegt ein **Deploy-Skript** unter `~/bin/deploy.sh`. Es aktualisiert den Code, baut Assets, führt Migrationen aus und leert Laravel-Caches. **Passe Pfade, Systemd-Dienstnamen und CloudPanel-Befehle an deine Umgebung an** (Stephan: nach Server-Umzug oder neuem Queue-Service hier und im Skript prüfen).
+
+### Ablauf (Kurzüberblick)
+
+| Schritt | Beschreibung |
+|--------|----------------|
+| Git | `fetch`, Branch `main`, `pull` |
+| PHP/JS | `composer install --no-dev`, `npm ci`, `npm run build` |
+| Laravel | `migrate --force`, `config:cache`, `route:cache`, `view:cache` |
+| Queue | Systemd-Dienst neu starten (aktuell `laravel-queue`) |
+| Rechte | `clpctl system:permissions:reset` (CloudPanel) |
+| Optional | Varnish-Cache leeren, wenn aktiv |
+
+### Beispiel: `~/bin/deploy.sh`
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+cd ~/htdocs/numberstore.curenect.io
+
+git fetch origin
+git checkout main
+git pull origin main
+
+composer install --no-dev --optimize-autoloader
+npm ci
+npm run build
+
+php artisan migrate --force
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+
+# OpenAPI/Swagger (in Prod. sinnvoll, wenn UI unter /api/documentation aktiv ist und
+# L5_SWAGGER_GENERATE_ALWAYS=false — sonst auskommentiert lassen)
+# php artisan l5-swagger:generate
+
+# Queue-Worker neu laden (Dienstnamen ggf. anpassen)
+sudo systemctl restart laravel-queue
+
+clpctl system:permissions:reset --directories=770 --files=660 --path=.
+
+# Nur wenn Varnish für die Site aktiv ist:
+# clpctl varnish-cache:purge --purge=all
+```
+
+### Hinweise
+
+- **`sudo systemctl restart …`** setzt voraus, dass der Deploy-User dazu berechtigt ist (sudoers).
+- **`clpctl`** ist spezifisch für **CloudPanel**; ohne CloudPanel diesen Block entfallen lassen und Berechtigungen manuell setzen (`chown`/`chmod` gemäß Hosting-Doku).
+- Nach größeren Änderungen an Jobs/Queues kann alternativ oder zusätzlich `php artisan queue:restart` sinnvoll sein (signalisiert laufenden Workern, nach dem aktuellen Job sauber zu beenden); der **Systemd-Neustart** stellt sicher, dass der Prozess den neuen Code lädt.
+- In **Produktion** `.env` prüfen: `APP_ENV=production`, `APP_DEBUG=false`, `L5_SWAGGER_GENERATE_ALWAYS=false` (siehe Abschnitt Swagger).
+
 ## Technologieüberblick
 
 - Laravel **13.x**

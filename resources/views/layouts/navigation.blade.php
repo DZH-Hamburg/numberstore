@@ -18,9 +18,9 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
-                    @can('create', Group::class)
-                        <x-nav-link :href="route('groups.create')" :active="request()->routeIs('groups.create')">
-                            {{ __('Gruppe anlegen') }}
+                    @can('viewAny', Group::class)
+                        <x-nav-link :href="route('groups.index')" :active="request()->routeIs('groups.*')">
+                            {{ __('Gruppen') }}
                         </x-nav-link>
                     @endcan
                     @can('viewAny', User::class)
@@ -84,9 +84,9 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
-            @can('create', Group::class)
-                <x-responsive-nav-link :href="route('groups.create')" :active="request()->routeIs('groups.create')">
-                    {{ __('Gruppe anlegen') }}
+            @can('viewAny', Group::class)
+                <x-responsive-nav-link :href="route('groups.index')" :active="request()->routeIs('groups.*')">
+                    {{ __('Gruppen') }}
                 </x-responsive-nav-link>
             @endcan
             @can('viewAny', User::class)

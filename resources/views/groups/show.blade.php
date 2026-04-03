@@ -39,13 +39,18 @@
                     @endcan
                 </nav>
             </div>
-            @can('delete', $group)
-                <form method="post" action="{{ route('groups.destroy', $group) }}" onsubmit="return confirm(@json(__('Gruppe wirklich löschen?')));">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="text-sm font-medium text-opta-berry hover:underline">{{ __('Gruppe löschen') }}</button>
-                </form>
-            @endcan
+            <div class="flex flex-wrap items-center gap-4">
+                @can('update', $group)
+                    <a href="{{ route('groups.edit', $group) }}" class="text-sm font-medium text-opta-teal-dark hover:underline">{{ __('Gruppe bearbeiten') }}</a>
+                @endcan
+                @can('delete', $group)
+                    <form method="post" action="{{ route('groups.destroy', $group) }}" onsubmit="return confirm(@json(__('Gruppe wirklich löschen?')));">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="text-sm font-medium text-opta-berry hover:underline">{{ __('Gruppe löschen') }}</button>
+                    </form>
+                @endcan
+            </div>
         </div>
     </x-slot>
 

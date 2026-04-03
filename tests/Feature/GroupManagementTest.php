@@ -38,6 +38,102 @@ class GroupManagementTest extends TestCase
         $this->actingAs($user)->post('/groups', ['name' => 'X'])->assertForbidden();
     }
 
+    public function test_member_can_open_groups_index_and_see_only_their_groups(): void
+    {
+        $member = User::factory()->create(['can_create_groups' => false, 'is_platform_admin' => false]);
+        $other = User::factory()->create();
+
+        $mine = Group::query()->create(['name' => 'Meine Gruppe', 'slug' => 'meine-gruppe', 'created_by' => $other->id]);
+        $mine->users()->attach($member->id, ['role' => GroupMembershipRole::Consumer]);
+
+        $foreign = Group::query()->create(['name' => 'Fremd', 'slug' => 'fremd', 'created_by' => $other->id]);
+        $foreign->users()->attach($other->id, ['role' => GroupMembershipRole::GroupCreator]);
+
+        $response = $this->actingAs($member)->get(route('groups.index'));
+        $response->assertOk();
+        $response->assertSee('Meine Gruppe', false);
+        $response->assertDontSee('Fremd', false);
+    }
+
+    public function test_groups_index_search_filters_by_name(): void
+    {
+        $user = User::factory()->globalGroupCreator()->create();
+        $g1 = Group::query()->create(['name' => 'Alpha Team', 'slug' => 'alpha-team', 'created_by' => $user->id]);
+        $g1->users()->attach($user->id, ['role' => GroupMembershipRole::GroupCreator]);
+        $g2 = Group::query()->create(['name' => 'Beta Club', 'slug' => 'beta-club', 'created_by' => $user->id]);
+        $g2->users()->attach($user->id, ['role' => GroupMembershipRole::GroupCreator]);
+
+        $response = $this->actingAs($user)->get(route('groups.index', ['q' => 'alpha']));
+        $response->assertOk();
+        $response->assertSee('Alpha Team', false);
+        $response->assertDontSee('Beta Club', false);
+    }
+
+    public function test_groups_index_role_filter_limits_to_matching_membership(): void
+    {
+        $user = User::factory()->globalGroupCreator()->create();
+
+        $asCreator = Group::query()->create(['name' => 'Creator Only', 'slug' => 'creator-only', 'created_by' => $user->id]);
+        $asCreator->users()->attach($user->id, ['role' => GroupMembershipRole::GroupCreator]);
+
+        $asConsumer = Group::query()->create(['name' => 'Consumer Only', 'slug' => 'consumer-only', 'created_by' => $user->id]);
+        $asConsumer->users()->attach($user->id, ['role' => GroupMembershipRole::Consumer]);
+
+        $response = $this->actingAs($user)->get(route('groups.index', ['role' => GroupMembershipRole::GroupCreator->value]));
+        $response->assertOk();
+        $response->assertSee('Creator Only', false);
+        $response->assertDontSee('Consumer Only', false);
+    }
+
+    public function test_group_creator_can_update_group_name(): void
+    {
+        $user = User::factory()->globalGroupCreator()->create();
+        $group = Group::query()->create(['name' => 'Alt', 'slug' => 'alt', 'created_by' => $user->id]);
+        $group->users()->attach($user->id, ['role' => GroupMembershipRole::GroupCreator]);
+
+        $response = $this->actingAs($user)->patch(route('groups.update', $group), ['name' => 'Neu']);
+        $response->assertRedirect(route('groups.show', $group));
+        $group->refresh();
+        $this->assertSame('Neu', $group->name);
+        $this->assertSame('neu', $group->slug);
+    }
+
+    public function test_update_group_name_assigns_suffix_slug_when_base_slug_is_taken(): void
+    {
+        $user = User::factory()->globalGroupCreator()->create();
+        $alpha = Group::query()->create(['name' => 'Alpha', 'slug' => 'alpha', 'created_by' => $user->id]);
+        $alpha->users()->attach($user->id, ['role' => GroupMembershipRole::GroupCreator]);
+        $beta = Group::query()->create(['name' => 'Beta', 'slug' => 'beta', 'created_by' => $user->id]);
+        $beta->users()->attach($user->id, ['role' => GroupMembershipRole::GroupCreator]);
+
+        $this->actingAs($user)->patch(route('groups.update', $alpha), ['name' => 'Beta']);
+
+        $alpha->refresh();
+        $this->assertSame('beta-1', $alpha->slug);
+        $this->assertSame('beta', $beta->fresh()->slug);
+    }
+
+    public function test_platform_admin_delete_redirects_to_groups_index(): void
+    {
+        $admin = User::factory()->platformAdmin()->create();
+        $group = Group::query()->create(['name' => 'DelMe', 'slug' => 'del-me', 'created_by' => $admin->id]);
+
+        $response = $this->actingAs($admin)->delete(route('groups.destroy', $group));
+
+        $response->assertRedirect(route('groups.index'));
+        $this->assertFalse(Group::query()->whereKey($group->getKey())->exists());
+    }
+
+    public function test_consumer_cannot_update_group(): void
+    {
+        $creator = User::factory()->globalGroupCreator()->create();
+        $consumer = User::factory()->create(['can_create_groups' => false, 'is_platform_admin' => false]);
+        $group = Group::query()->create(['name' => 'G', 'slug' => 'g', 'created_by' => $creator->id]);
+        $group->users()->attach($consumer->id, ['role' => GroupMembershipRole::Consumer]);
+
+        $this->actingAs($consumer)->patch(route('groups.update', $group), ['name' => 'Hacked'])->assertForbidden();
+    }
+
     public function test_group_creator_can_create_element(): void
     {
         $user = User::factory()->globalGroupCreator()->create();

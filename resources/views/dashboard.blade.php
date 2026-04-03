@@ -18,11 +18,9 @@
                     <h3 class="text-lg font-semibold text-opta-teal-dark">{{ __('Deine Gruppen') }}</h3>
                     @if ($groups->isEmpty())
                         <p class="text-opta-grey">{{ __('Noch keine Gruppen. Lege eine an oder nimm eine Einladung an.') }}</p>
-                        @can('create', \App\Models\Group::class)
-                            <a href="{{ route('groups.create') }}" class="inline-flex items-center gap-2 text-opta-teal-dark font-medium hover:text-opta-teal-light">
-                                {{ __('Gruppe anlegen') }}
-                            </a>
-                        @endcan
+                        <a href="{{ route('groups.index') }}" class="inline-flex items-center gap-2 text-opta-teal-dark font-medium hover:text-opta-teal-light">
+                            {{ __('Zu den Gruppen') }}
+                        </a>
                     @else
                         <ul class="divide-y divide-opta-teal-light/30">
                             @foreach ($groups as $group)

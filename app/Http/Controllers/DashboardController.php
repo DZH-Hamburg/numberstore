@@ -15,7 +15,7 @@ class DashboardController extends Controller
         $user = $request->user();
         $groups = Group::query()
             ->when(! $user->isPlatformAdmin(), function ($q) use ($user): void {
-                $q->whereIn('id', $user->groups()->pluck('groups.id'));
+                $q->whereHas('users', fn ($sub) => $sub->whereKey($user->getKey()));
             })
             ->orderBy('name')
             ->get();

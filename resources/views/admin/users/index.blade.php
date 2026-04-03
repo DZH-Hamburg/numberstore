@@ -14,12 +14,6 @@
 
     <div class="py-10">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-4">
-            @if (session('status'))
-                <div class="rounded-lg border border-opta-green/40 bg-opta-green/10 px-4 py-3 text-opta-grey text-left" role="status">
-                    {{ session('status') }}
-                </div>
-            @endif
-
             <div class="bg-white border border-opta-teal-light/30 shadow-sm sm:rounded-xl overflow-x-auto text-left">
                 <table class="min-w-full divide-y divide-opta-teal-light/30 text-sm">
                     <thead class="bg-opta-teal-light/10">

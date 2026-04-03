@@ -17,12 +17,6 @@
 
     <div class="py-10">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            @if (session('status'))
-                <div class="rounded-lg border border-opta-green/40 bg-opta-green/10 px-4 py-3 text-opta-grey text-left" role="status">
-                    {{ session('status') }}
-                </div>
-            @endif
-
             <div class="bg-white overflow-hidden shadow-sm border border-opta-teal-light/30 sm:rounded-xl">
                 <div class="p-6 space-y-6 text-left">
                     <form method="get" action="{{ route('groups.index') }}" class="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end">

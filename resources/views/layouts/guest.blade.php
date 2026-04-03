@@ -33,5 +33,6 @@
                 </div>
             @endisset
         </div>
+        <x-flash-toast />
     </body>
 </html>

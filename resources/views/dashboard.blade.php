@@ -7,12 +7,6 @@
 
     <div class="py-10">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            @if (session('status'))
-                <div class="rounded-lg border border-opta-green/40 bg-opta-green/10 px-4 py-3 text-opta-grey text-left" role="status">
-                    {{ session('status') }}
-                </div>
-            @endif
-
             <div class="bg-white overflow-hidden shadow-sm border border-opta-teal-light/30 sm:rounded-xl">
                 <div class="p-6 space-y-4 text-left">
                     <h3 class="text-lg font-semibold text-opta-teal-dark">{{ __('Deine Gruppen') }}</h3>

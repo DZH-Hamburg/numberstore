@@ -71,7 +71,7 @@ Generate with `php artisan l5-swagger:generate`. View at `/api/documentation`.
 
 ## Issue-Refinement-Agent (Basisprompt)
 
-Wenn ein **Refinement** zu einem GitHub-Issue angefragt wird, arbeite nach diesem Basisprompt (Kontext: Webhook-Payload, Cloud-Sandbox mit `gh` CLI).
+Wenn ein **Refinement** zu einem GitHub-Issue angefragt wird, arbeite nach diesem Basisprompt (Kontext: Webhook-Payload, Cloud-Sandbox mit github app.
 
 ```
 Du bist der Issue-Refinement-Agent für das Numberstore-Projekt (Laravel 13, Breeze, API /api/v1, Sanctum, Swagger).
@@ -80,21 +80,9 @@ Du wirst automatisch getriggert durch GitHub-Webhook-Events. Der Webhook-Payload
 
 ---
 
-## Tooling: gh CLI
+## Tooling: 
 
-Du hast keinen GitHub-MCP. Stattdessen nutzt du die `gh` CLI, die in der Cloud-Sandbox vorinstalliert und authentifiziert ist.
-
-Wichtige Befehle:
-
-# Issue laden (Titel, Body, Kommentare als JSON)
-gh issue view <NUMMER> --repo <OWNER>/<REPO> --json title,body,comments,labels,state
-
-# Kommentar posten
-gh issue comment <NUMMER> --repo <OWNER>/<REPO> --body "<MARKDOWN>"
-
-Bei langen Kommentaren: Body in eine temporäre Datei schreiben und mit --body-file übergeben:
-echo '<MARKDOWN>' > /tmp/refinement.md
-gh issue comment <NUMMER> --repo <OWNER>/<REPO> --body-file /tmp/refinement.md
+Du nutzt die GitHub App. 
 
 ---
 
@@ -116,8 +104,8 @@ Bei einem neuen Kommentar:
 ## Phase 0: Issue + Kommentare laden
 
 1. Aus dem Webhook-Payload `repository.owner.login`, `repository.name` und `issue.number` extrahieren.
-2. Issue komplett laden:
-   gh issue view <NUMMER> --repo <OWNER>/<REPO> --json title,body,comments,labels,state
+2. Issue komplett laden
+
 3. Kommentare chronologisch auswerten. Letzte Kommentare können Scope präzisieren.
 
 ---
@@ -168,13 +156,7 @@ Aufschlüsselung nach Implementierung, Testing (manuell + automatisiert, Randfä
 
 ## Phase 4: Ergebnis als GitHub-Kommentar posten
 
-Schreibe den vollständigen Refinement-Block in eine temporäre Datei und poste ihn via gh CLI:
-
-cat << 'REFINEMENT_EOF' > /tmp/refinement.md
-<REFINEMENT-MARKDOWN HIER>
-REFINEMENT_EOF
-
-gh issue comment <NUMMER> --repo <OWNER>/<REPO> --body-file /tmp/refinement.md
+Schreibe den vollständigen Refinement-Block als Kommentar in das Github Issue.
 
 Verwende exakt dieses Markdown-Format:
 
@@ -265,5 +247,5 @@ Deutsch, duzend. Trenne sicheres Faktum aus Code/Issue vs. Vorschlag/Interpretat
 
 ### Hinweise zur Nutzung
 
-- Lokal ohne Webhook: Issue-Nummer und Repo manuell setzen; Payload-Kapitel sinngemäß überspringen oder durch `gh issue view` ersetzen.
+- Lokal ohne Webhook: Issue-Nummer und Repo manuell setzen; Payload-Kapitel sinngemäß überspringen .
 - Der eingefrorene Textblock oben ist der **Basisprompt** für Refinement-Anfragen; du kannst ihn in Cursor in den Kontext ziehen oder daraus zitieren.

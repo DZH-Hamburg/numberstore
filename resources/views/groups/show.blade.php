@@ -83,12 +83,6 @@
         @open-group-invite-modal.window="inviteModalOpen = true"
     >
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            @if (session('status'))
-                <div class="rounded-lg border border-opta-green/40 bg-opta-green/10 px-4 py-3 text-opta-grey text-left" role="status">
-                    {{ session('status') }}
-                </div>
-            @endif
-
             {{-- Mitglieder-Modal --}}
             <div
                 x-show="membersModalOpen"

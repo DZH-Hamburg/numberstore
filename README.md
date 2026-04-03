@@ -145,7 +145,7 @@ php artisan test
 
 ## Deployment (Produktion / Entwicklungsserver)
 
-Auf dem Entwicklungsserver liegt ein **Deploy-Skript** unter `~/bin/deploy.sh`. Es aktualisiert den Code, baut Assets, führt Migrationen aus und leert Laravel-Caches. **Passe Pfade, Systemd-Dienstnamen und CloudPanel-Befehle an deine Umgebung an** (Stephan: nach Server-Umzug oder neuem Queue-Service hier und im Skript prüfen).
+Auf dem Entwicklungsserver liegt ein **Deploy-Skript** unter `~/bin/deploy.sh`. Es aktualisiert den Code, baut Assets, führt Migrationen aus und leert Laravel-Caches. **Passe Pfade und CloudPanel-Befehle an deine Umgebung an** (Stephan: nach Server-Umzug hier und in `~/bin/deploy.sh` prüfen).
 
 ### Ablauf (Kurzüberblick)
 
@@ -154,7 +154,7 @@ Auf dem Entwicklungsserver liegt ein **Deploy-Skript** unter `~/bin/deploy.sh`. 
 | Git | `fetch`, Branch `main`, `pull` |
 | PHP/JS | `composer install --no-dev`, `npm ci`, `npm run build` |
 | Laravel | `migrate --force`, `config:cache`, `route:cache`, `view:cache` |
-| Queue | Systemd-Dienst neu starten (aktuell `laravel-queue`) |
+| Queue | `php artisan queue:restart` (laufende Worker beenden sich nach dem aktuellen Job und starten mit neuem Code neu — Voraussetzung: Supervisor/Systemd o. Ä. startet `queue:work`/`queue:listen` neu) |
 | Rechte | `clpctl system:permissions:reset` (CloudPanel) |
 | Optional | Varnish-Cache leeren, wenn aktiv |
 
@@ -182,8 +182,7 @@ php artisan view:cache
 # L5_SWAGGER_GENERATE_ALWAYS=false — sonst auskommentiert lassen)
 # php artisan l5-swagger:generate
 
-# Queue-Worker neu laden (Dienstnamen ggf. anpassen)
-sudo systemctl restart laravel-queue
+php artisan queue:restart
 
 clpctl system:permissions:reset --directories=770 --files=660 --path=.
 
@@ -193,9 +192,8 @@ clpctl system:permissions:reset --directories=770 --files=660 --path=.
 
 ### Hinweise
 
-- **`sudo systemctl restart …`** setzt voraus, dass der Deploy-User dazu berechtigt ist (sudoers).
+- **`php artisan queue:restart`** schreibt nur ein Signal in den Cache; die Worker beenden sich selbst und müssen vom Prozess-Manager (Supervisor, CloudPanel, Systemd ohne sudo für dich usw.) **automatisch wieder gestartet** werden. Ohne laufenden `queue:work`/`queue:listen` passiert nach dem Deploy nichts in der Queue — das ist Absicht.
 - **`clpctl`** ist spezifisch für **CloudPanel**; ohne CloudPanel diesen Block entfallen lassen und Berechtigungen manuell setzen (`chown`/`chmod` gemäß Hosting-Doku).
-- Nach größeren Änderungen an Jobs/Queues kann alternativ oder zusätzlich `php artisan queue:restart` sinnvoll sein (signalisiert laufenden Workern, nach dem aktuellen Job sauber zu beenden); der **Systemd-Neustart** stellt sicher, dass der Prozess den neuen Code lädt.
 - In **Produktion** `.env` prüfen: `APP_ENV=production`, `APP_DEBUG=false`, `L5_SWAGGER_GENERATE_ALWAYS=false` (siehe Abschnitt Swagger).
 
 ## Technologieüberblick

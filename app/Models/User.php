@@ -13,7 +13,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['name', 'email', 'password', 'avatar_path', 'is_platform_admin', 'can_create_groups'])]
+#[Fillable(['name', 'email', 'password', 'is_platform_admin', 'can_create_groups'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -71,7 +71,7 @@ class User extends Authenticatable
 
     public function avatarUrl(int $size = 160): string
     {
-        if ($this->avatar_path && Storage::disk('public')->exists($this->avatar_path)) {
+        if ($this->avatar_path !== null && $this->avatar_path !== '') {
             return Storage::disk('public')->url($this->avatar_path);
         }
 

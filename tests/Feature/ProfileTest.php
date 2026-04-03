@@ -99,6 +99,21 @@ class ProfileTest extends TestCase
         $this->assertNotNull($user->fresh());
     }
 
+    public function test_avatar_path_cannot_be_mass_assigned_via_profile_form(): void
+    {
+        $user = User::factory()->create();
+
+        $this
+            ->actingAs($user)
+            ->patch('/profile', [
+                'name' => $user->name,
+                'email' => $user->email,
+                'avatar_path' => 'avatars/evil.jpg',
+            ]);
+
+        $this->assertNull($user->fresh()->avatar_path);
+    }
+
     public function test_profile_uses_gravatar_when_no_upload(): void
     {
         $user = User::factory()->create(['email' => '  Test@Example.com ']);

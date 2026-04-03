@@ -45,14 +45,30 @@ class Group extends Model
             if ($group->slug !== null && $group->slug !== '') {
                 return;
             }
-            $base = Str::slug($group->name);
-            $slug = $base;
-            $i = 0;
-            while (static::query()->where('slug', $slug)->exists()) {
-                $slug = $base.'-'.(++$i);
-            }
-            $group->slug = $slug;
+            $group->slug = static::uniqueSlugForName($group->name);
         });
+
+        static::updating(function (Group $group): void {
+            if (! $group->isDirty('name')) {
+                return;
+            }
+            $group->slug = static::uniqueSlugForName($group->name, $group->getKey());
+        });
+    }
+
+    public static function uniqueSlugForName(string $name, ?int $ignoreId = null): string
+    {
+        $base = Str::slug($name);
+        $slug = $base;
+        $i = 0;
+        while (static::query()
+            ->when($ignoreId !== null, fn ($q) => $q->whereKeyNot($ignoreId))
+            ->where('slug', $slug)
+            ->exists()) {
+            $slug = $base.'-'.(++$i);
+        }
+
+        return $slug;
     }
 
     public function userHasRole(User $user, GroupMembershipRole $role): bool

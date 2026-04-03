@@ -21,10 +21,13 @@ class ElementController extends Controller
     public function store(StoreElementRequest $request, Group $group): RedirectResponse
     {
         $data = $request->validated();
+        $secrets = $this->extractSecrets($data);
+
         $element = Element::query()->create([
             'type' => $data['type'],
             'name' => $data['name'],
             'config' => $data['config'] ?? [],
+            'encrypted_credentials' => empty($secrets) ? null : json_encode($secrets, JSON_THROW_ON_ERROR),
             'created_by' => $request->user()->id,
         ]);
         $element->groups()->attach($group->id, [
@@ -56,6 +59,11 @@ class ElementController extends Controller
         if (array_key_exists('config', $data)) {
             $element->config = $data['config'] ?? [];
         }
+
+        if (array_key_exists('secrets', $data)) {
+            $incoming = $this->extractSecrets($data);
+            $element->encrypted_credentials = $this->mergeSecrets($element->encrypted_credentials, $incoming);
+        }
         $element->save();
 
         if ($request->has('consumer_can_read_via_api') && $request->canSetConsumerFlag()) {
@@ -77,5 +85,46 @@ class ElementController extends Controller
         }
 
         return redirect()->route('groups.show', $group)->with('status', __('Element entfernt.'));
+    }
+
+    /**
+     * @param  array<string,mixed>  $validated
+     * @return array{username?:string,password?:string,totp_secret?:string}
+     */
+    private function extractSecrets(array $validated): array
+    {
+        $raw = $validated['secrets'] ?? null;
+        if (! is_array($raw)) {
+            return [];
+        }
+
+        $out = [];
+        foreach (['username', 'password', 'totp_secret'] as $key) {
+            $v = $raw[$key] ?? null;
+            if (is_string($v) && trim($v) !== '') {
+                $out[$key] = $v;
+            }
+        }
+
+        return $out;
+    }
+
+    private function mergeSecrets(mixed $currentEncrypted, array $incoming): ?string
+    {
+        $current = [];
+        if (is_string($currentEncrypted) && $currentEncrypted !== '') {
+            try {
+                $decoded = json_decode($currentEncrypted, true, flags: JSON_THROW_ON_ERROR);
+                if (is_array($decoded)) {
+                    $current = $decoded;
+                }
+            } catch (\Throwable) {
+                $current = [];
+            }
+        }
+
+        $merged = array_merge($current, $incoming);
+
+        return empty($merged) ? null : json_encode($merged, JSON_THROW_ON_ERROR);
     }
 }

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ElementController;
+use App\Http\Controllers\ElementScreenshotController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\GroupInvitationController;
 use App\Http\Controllers\GroupMemberController;
@@ -41,6 +42,10 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('/groups/{group}/elements/{element}/edit', [ElementController::class, 'edit'])->name('groups.elements.edit');
     Route::patch('/groups/{group}/elements/{element}', [ElementController::class, 'update'])->name('groups.elements.update');
     Route::delete('/groups/{group}/elements/{element}', [ElementController::class, 'destroy'])->name('groups.elements.destroy');
+
+    Route::get('/groups/{group}/elements/{element}/screenshot', [ElementScreenshotController::class, 'show'])->name('groups.elements.screenshot.show');
+    Route::post('/groups/{group}/elements/{element}/screenshot', [ElementScreenshotController::class, 'store'])->name('groups.elements.screenshot.store');
+    Route::get('/groups/{group}/elements/{element}/screenshot/meta', [ElementScreenshotController::class, 'meta'])->name('groups.elements.screenshot.meta');
 
     Route::post('/invitations/{token}/accept', [InvitationAcceptController::class, 'accept'])->name('invitations.accept');
 

@@ -1,7 +1,3 @@
-@php
-    use App\Enums\GroupMembershipRole;
-@endphp
-
 <x-app-layout>
     <x-slot name="header">
         <div class="flex flex-wrap items-center justify-between gap-4 text-left">
@@ -49,8 +45,8 @@
                                 class="mt-1 block w-full rounded-md border-opta-teal-light/50 shadow-sm focus:border-opta-teal-dark focus:ring-opta-teal-dark text-sm text-opta-grey"
                             >
                                 <option value="">{{ __('Alle') }}</option>
-                                <option value="{{ GroupMembershipRole::GroupCreator->value }}" @selected($filters['role'] === GroupMembershipRole::GroupCreator->value)>{{ __('Gruppen-Ersteller') }}</option>
-                                <option value="{{ GroupMembershipRole::Consumer->value }}" @selected($filters['role'] === GroupMembershipRole::Consumer->value)>{{ __('Consumer') }}</option>
+                                <option value="{{ \App\Enums\GroupMembershipRole::GroupCreator->value }}" @selected($filters['role'] === \App\Enums\GroupMembershipRole::GroupCreator->value)>{{ __('Gruppen-Ersteller') }}</option>
+                                <option value="{{ \App\Enums\GroupMembershipRole::Consumer->value }}" @selected($filters['role'] === \App\Enums\GroupMembershipRole::Consumer->value)>{{ __('Consumer') }}</option>
                             </select>
                         </div>
                         <div class="flex flex-wrap gap-2">

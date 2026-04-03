@@ -14,7 +14,7 @@ class ElementPolicy
             return true;
         }
 
-        return $element->groups()->whereIn('groups.id', $user->groups()->pluck('groups.id'))->exists();
+        return $element->groups()->whereHas('users', fn ($q) => $q->whereKey($user->getKey()))->exists();
     }
 
     public function viewViaApi(User $user, Element $element, Group $group): bool

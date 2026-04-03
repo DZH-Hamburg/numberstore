@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 #[Fillable(['name', 'slug', 'created_by'])]
@@ -69,6 +70,36 @@ class Group extends Model
         }
 
         return $slug;
+    }
+
+    /**
+     * Speichert die Gruppe in einer kurzen Transaktion. Bei parallelen Anfragen kann die
+     * eindeutige Slug-Prüfung trotzdem kollidieren; dann wird der Slug erneut vergeben (Retry).
+     *
+     * @param  array<string, mixed>  $options
+     */
+    public function save(array $options = []): bool
+    {
+        return DB::transaction(function () use ($options): bool {
+            for ($attempt = 0; $attempt < 25; $attempt++) {
+                try {
+                    return parent::save($options);
+                } catch (\Throwable $e) {
+                    if (! static::isUniqueSlugConstraintViolation($e)) {
+                        throw $e;
+                    }
+                    $this->slug = static::uniqueSlugForName($this->name, $this->exists ? $this->getKey() : null);
+                }
+            }
+
+            throw new \RuntimeException('Unique slug could not be assigned after retries.');
+        });
+    }
+
+    private static function isUniqueSlugConstraintViolation(\Throwable $e): bool
+    {
+        return is_a($e, 'Illuminate\\Database\\'.'UniqueConstraintViolationException', true) // pragma: allowlist secret
+            && str_contains(strtolower($e->getMessage()), 'slug');
     }
 
     public function userHasRole(User $user, GroupMembershipRole $role): bool

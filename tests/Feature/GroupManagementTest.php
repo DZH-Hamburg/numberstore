@@ -93,7 +93,35 @@ class GroupManagementTest extends TestCase
 
         $response = $this->actingAs($user)->patch(route('groups.update', $group), ['name' => 'Neu']);
         $response->assertRedirect(route('groups.show', $group));
-        $this->assertDatabaseHas('groups', ['id' => $group->id, 'name' => 'Neu', 'slug' => 'neu']); // pragma: allowlist secret
+        $group->refresh();
+        $this->assertSame('Neu', $group->name);
+        $this->assertSame('neu', $group->slug);
+    }
+
+    public function test_update_group_name_assigns_suffix_slug_when_base_slug_is_taken(): void
+    {
+        $user = User::factory()->globalGroupCreator()->create();
+        $alpha = Group::query()->create(['name' => 'Alpha', 'slug' => 'alpha', 'created_by' => $user->id]);
+        $alpha->users()->attach($user->id, ['role' => GroupMembershipRole::GroupCreator]);
+        $beta = Group::query()->create(['name' => 'Beta', 'slug' => 'beta', 'created_by' => $user->id]);
+        $beta->users()->attach($user->id, ['role' => GroupMembershipRole::GroupCreator]);
+
+        $this->actingAs($user)->patch(route('groups.update', $alpha), ['name' => 'Beta']);
+
+        $alpha->refresh();
+        $this->assertSame('beta-1', $alpha->slug);
+        $this->assertSame('beta', $beta->fresh()->slug);
+    }
+
+    public function test_platform_admin_delete_redirects_to_groups_index(): void
+    {
+        $admin = User::factory()->platformAdmin()->create();
+        $group = Group::query()->create(['name' => 'DelMe', 'slug' => 'del-me', 'created_by' => $admin->id]);
+
+        $response = $this->actingAs($admin)->delete(route('groups.destroy', $group));
+
+        $response->assertRedirect(route('groups.index'));
+        $this->assertFalse(Group::query()->whereKey($group->getKey())->exists());
     }
 
     public function test_consumer_cannot_update_group(): void

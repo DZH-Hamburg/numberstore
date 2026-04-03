@@ -24,7 +24,7 @@ class GroupController extends Controller
             ->with(['creator:id,name'])
             ->withCount('users')
             ->when(! $user->isPlatformAdmin(), function ($query) use ($user): void {
-                $query->whereIn('id', $user->groups()->pluck('groups.id'));
+                $query->whereHas('users', fn ($sub) => $sub->whereKey($user->getKey()));
             })
             ->when($q !== '', function ($query) use ($q): void {
                 $like = '%'.addcslashes(mb_strtolower($q), '%_\\').'%';

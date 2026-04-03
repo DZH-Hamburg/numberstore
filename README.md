@@ -48,6 +48,12 @@ Basisanwendung auf **Laravel 13** mit **Web-Anmeldung** (Laravel Breeze, Blade),
    php artisan migrate
    ```
 
+   Für öffentlich erreichbare Profilbilder (Disk `public`) den symbolischen Link anlegen:
+
+   ```bash
+   php artisan storage:link
+   ```
+
 7. **Frontend-Assets** installieren und für die Produktion bauen:
 
    ```bash

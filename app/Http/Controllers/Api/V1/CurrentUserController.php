@@ -24,6 +24,7 @@ class CurrentUserController extends Controller
                         new OA\Property(property: 'name', type: 'string'),
                         new OA\Property(property: 'email', type: 'string', format: 'email'),
                         new OA\Property(property: 'email_verified_at', type: 'string', format: 'date-time', nullable: true),
+                        new OA\Property(property: 'avatar_url', type: 'string', format: 'uri'),
                         new OA\Property(property: 'is_platform_admin', type: 'boolean'),
                         new OA\Property(property: 'can_create_groups', type: 'boolean'),
                     ]
@@ -38,6 +39,7 @@ class CurrentUserController extends Controller
 
         return response()->json([
             ...$user->only(['id', 'name', 'email', 'email_verified_at']),
+            'avatar_url' => $user->avatarUrl(),
             'is_platform_admin' => $user->is_platform_admin,
             'can_create_groups' => $user->can_create_groups,
         ]);

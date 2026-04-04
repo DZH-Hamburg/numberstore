@@ -7,7 +7,6 @@ use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
@@ -44,8 +43,9 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
-        Auth::login($user);
+        $request->session()->put('two_factor_pending_user_id', $user->getKey());
+        $request->session()->put('two_factor_remember', false);
 
-        return redirect(route('dashboard', absolute: false));
+        return redirect()->route('two-factor.login');
     }
 }

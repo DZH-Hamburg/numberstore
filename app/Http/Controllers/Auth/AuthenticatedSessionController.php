@@ -42,11 +42,12 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-        $request->authenticate();
+        $user = $request->validateCredentials();
 
-        $request->session()->regenerate();
+        $request->session()->put('two_factor_pending_user_id', $user->getKey());
+        $request->session()->put('two_factor_remember', $request->boolean('remember'));
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        return redirect()->route('two-factor.login');
     }
 
     /**

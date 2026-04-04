@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\GroupMembershipRole;
+use App\Enums\TwoFactorMethod;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -14,7 +15,7 @@ use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\HasApiTokens;
 
 #[Fillable(['name', 'email', 'password', 'is_platform_admin', 'can_create_groups'])]
-#[Hidden(['password', 'remember_token'])]
+#[Hidden(['password', 'remember_token', 'two_factor_secret'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
@@ -62,6 +63,16 @@ class User extends Authenticatable
         return $this->groups()->where('groups.id', $group->id)->exists();
     }
 
+    public function usesEmailTwoFactor(): bool
+    {
+        return $this->two_factor_method === TwoFactorMethod::Email;
+    }
+
+    public function usesTotpTwoFactor(): bool
+    {
+        return $this->two_factor_method === TwoFactorMethod::Totp;
+    }
+
     public function gravatarUrl(int $size = 160): string
     {
         $hash = md5(strtolower(trim($this->email)));
@@ -85,6 +96,9 @@ class User extends Authenticatable
             'password' => 'hashed',
             'is_platform_admin' => 'boolean',
             'can_create_groups' => 'boolean',
+            'two_factor_method' => TwoFactorMethod::class,
+            'two_factor_secret' => 'encrypted',
+            'two_factor_confirmed_at' => 'datetime',
         ];
     }
 }

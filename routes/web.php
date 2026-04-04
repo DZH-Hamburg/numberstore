@@ -8,6 +8,7 @@ use App\Http\Controllers\GroupController;
 use App\Http\Controllers\GroupInvitationController;
 use App\Http\Controllers\GroupMemberController;
 use App\Http\Controllers\InvitationAcceptController;
+use App\Http\Controllers\Profile\TwoFactorSettingsController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QueueWorkerController;
 use Illuminate\Support\Facades\Route;
@@ -59,6 +60,15 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile/avatar', [ProfileController::class, 'destroyAvatar'])->name('profile.avatar.destroy');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::post('/profile/two-factor/totp/start', [TwoFactorSettingsController::class, 'startTotpEnrollment'])
+        ->name('profile.two-factor.totp.start');
+    Route::post('/profile/two-factor/totp/confirm', [TwoFactorSettingsController::class, 'confirmTotpEnrollment'])
+        ->name('profile.two-factor.totp.confirm');
+    Route::post('/profile/two-factor/totp/cancel', [TwoFactorSettingsController::class, 'cancelTotpEnrollment'])
+        ->name('profile.two-factor.totp.cancel');
+    Route::post('/profile/two-factor/email', [TwoFactorSettingsController::class, 'useEmail'])
+        ->name('profile.two-factor.email');
 });
 
 require __DIR__.'/auth.php';

@@ -9,6 +9,7 @@ use App\Http\Controllers\GroupInvitationController;
 use App\Http\Controllers\GroupMemberController;
 use App\Http\Controllers\InvitationAcceptController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\QueueWorkerController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -22,6 +23,8 @@ Route::get('/invitations/{token}', [InvitationAcceptController::class, 'show'])
 
 Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
+
+    Route::get('/system/queue-worker', QueueWorkerController::class)->name('system.queue-worker');
 
     Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::resource('users', AdminUserController::class)->except(['show']);

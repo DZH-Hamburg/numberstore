@@ -17,6 +17,7 @@
     </head>
     <body class="font-sans antialiased bg-opta-teal-light/15 text-opta-grey">
         <div class="min-h-screen">
+            @include('layouts.system-status-bar')
             @include('layouts.navigation')
 
             @isset($header)
